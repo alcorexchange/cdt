@@ -399,11 +399,12 @@ EOSIO_TEST_END
 
 // Definitions in `eosio.cdt/libraries/eosio/time.hpp`
 EOSIO_TEST_BEGIN(block_timestamp_type_test)
-   static const int64_t bt_epoch{946684800000LL};
+   static const int64_t bt_epoch{block_timestamp::block_timestamp_epoch};
+   static const int64_t bt_interval{block_timestamp::block_interval_ms};
 
    static const microseconds ms0{bt_epoch*1000};
-   static const microseconds ms1{bt_epoch*1000+500000};
-   static const microseconds ms2{bt_epoch*1000+1000000};
+   static const microseconds ms1{bt_epoch*1000+bt_interval*1000};
+   static const microseconds ms2{bt_epoch*1000+bt_interval*2000};
    static const microseconds ms_max{i64max};
 
    static const time_point tp0{ms0};
@@ -450,15 +451,15 @@ EOSIO_TEST_BEGIN(block_timestamp_type_test)
 
    // -------------------------------
    // time_point to_time_point()const
-   CHECK_EQUAL( block_timestamp{1}.to_time_point(), time_point{microseconds{(1*500+bt_epoch)*1000}} )
-   CHECK_EQUAL( block_timestamp{2}.to_time_point(), time_point{microseconds{(2*500+bt_epoch)*1000}} )
-   CHECK_EQUAL( block_timestamp{3}.to_time_point(), time_point{microseconds{(3*500+bt_epoch)*1000}} )
+   CHECK_EQUAL( block_timestamp{1}.to_time_point(), time_point{microseconds{(1*bt_interval+bt_epoch)*1000}} )
+   CHECK_EQUAL( block_timestamp{2}.to_time_point(), time_point{microseconds{(2*bt_interval+bt_epoch)*1000}} )
+   CHECK_EQUAL( block_timestamp{3}.to_time_point(), time_point{microseconds{(3*bt_interval+bt_epoch)*1000}} )
 
    // --------------------------
    // operator time_point()const
-   CHECK_EQUAL( block_timestamp{1}.operator time_point(), time_point{microseconds{(1*500+bt_epoch)*1000}} )
-   CHECK_EQUAL( block_timestamp{2}.operator time_point(), time_point{microseconds{(2*500+bt_epoch)*1000}} )
-   CHECK_EQUAL( block_timestamp{3}.operator time_point(), time_point{microseconds{(3*500+bt_epoch)*1000}} )
+   CHECK_EQUAL( block_timestamp{1}.operator time_point(), time_point{microseconds{(1*bt_interval+bt_epoch)*1000}} )
+   CHECK_EQUAL( block_timestamp{2}.operator time_point(), time_point{microseconds{(2*bt_interval+bt_epoch)*1000}} )
+   CHECK_EQUAL( block_timestamp{3}.operator time_point(), time_point{microseconds{(3*bt_interval+bt_epoch)*1000}} )
 
    // ---------------------------------
    // void operator=(const time_point&)
@@ -502,13 +503,14 @@ EOSIO_TEST_BEGIN(block_timestamp_type_test)
 
    // --------------------------------------------------------------------
    // static block_timestamp from_iso_string()
-   CHECK_EQUAL( block_timestamp::from_iso_string("2020-01-01T00:00:00").to_time_point().elapsed.count(), 1577836800000000LL);
+   // 2026, not 2020: the date must be after the block epoch under either build setting
+   CHECK_EQUAL( block_timestamp::from_iso_string("2026-01-01T00:00:00").to_time_point().elapsed.count(), 1767225600000000LL);
    CHECK_EQUAL( block_timestamp::from_iso_string("2038-01-19T03:14:07").to_time_point().elapsed.count(), 2147483647000000LL);
    CHECK_ASSERT( "date parsing failed", [](){ block_timestamp::from_iso_string("2010-12-08T00:00:99"); });
 
    // --------------------------------------------------------------------
    // std::string to_string()
-   CHECK_EQUAL( block_timestamp{ time_point{ microseconds{1577836800000000LL} } }.to_string(), "2020-01-01T00:00:00");
+   CHECK_EQUAL( block_timestamp{ time_point{ microseconds{1767225600000000LL} } }.to_string(), "2026-01-01T00:00:00");
    CHECK_EQUAL( block_timestamp{ time_point{ microseconds{2147483647000000LL} } }.to_string(), "2038-01-19T03:14:07");
 EOSIO_TEST_END
 

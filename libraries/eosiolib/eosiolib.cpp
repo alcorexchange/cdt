@@ -79,11 +79,6 @@ namespace eosio {
       return ct;
    }
 
-   block_timestamp current_block_time() {
-      static auto bt = block_timestamp(current_time_point());
-      return bt;
-   }
-
    std::vector<name> get_active_producers() {
       const auto buffer_size = get_active_producers(nullptr, 0);
       const auto prod_cnt = buffer_size / sizeof(name);

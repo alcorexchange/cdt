@@ -77,7 +77,12 @@ namespace eosio {
    *  @ingroup system
    *  @return time in microseconds from 1970 of the current block as a block_timestamp
    */
-   block_timestamp current_block_time();
+   inline block_timestamp current_block_time() {
+      // In the header, not in eosiolib.cpp: the slot depends on EOSIO_BLOCK_INTERVAL_MS /
+      // EOSIO_BLOCK_TIMESTAMP_EPOCH_MS, which are set when the contract is compiled.
+      static auto bt = block_timestamp(current_time_point());
+      return bt;
+   }
 
    using block_num_t = uint32_t;
 
